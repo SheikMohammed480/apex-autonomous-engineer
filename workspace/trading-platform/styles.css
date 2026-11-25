@@ -1,0 +1,589 @@
+body {
+    font-family: 'Share Tech Mono', monospace;
+    background-color: #0a0a0a;
+    color: #00ffcc;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 10px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.ticker-banner {
+    background: linear-gradient(90deg, #1a0033, #330066, #1a0033);
+    padding: 8px 20px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(0, 255, 204, 0.3);
+    white-space: nowrap;
+    overflow: hidden;
+    position: relative;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    font-size: 1.1em;
+    color: #fff;
+    text-shadow: 0 0 5px #00ffcc;
+}
+
+.ticker-item {
+    display: inline-block;
+    margin-right: 40px;
+    animation: ticker-scroll 30s linear infinite;
+}
+
+@keyframes ticker-scroll {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
+}
+
+.main-grid {
+    display: grid;
+    grid-template-columns: 2.5fr 1fr;
+    grid-template-rows: auto auto 1fr;
+    gap: 15px;
+    flex-grow: 1;
+}
+
+.panel {
+    background: rgba(10, 0, 20, 0.7);
+    border: 1px solid rgba(0, 255, 204, 0.3);
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 0 20px rgba(0, 255, 204, 0.15);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    position: relative;
+    overflow: hidden;
+}
+
+.panel::before {
+    content: '';
+    position: absolute;
+    top: -5px; left: -5px; right: -5px; bottom: -5px;
+    background: linear-gradient(45deg, #00ffcc, #ff00ff, #00ccff);
+    z-index: -1;
+    filter: blur(10px);
+    opacity: 0.2;
+}
+
+h2 {
+    color: #00ffcc;
+    text-shadow: 0 0 8px #00ffcc;
+    margin-top: 0;
+    margin-bottom: 20px;
+    border-bottom: 1px solid rgba(0, 255, 204, 0.2);
+    padding-bottom: 10px;
+}
+
+/* Grid Area Definitions */
+.chart-panel { grid-area: 1 / 1 / 2 / 2; display: flex; flex-direction: column; }
+.order-book-panel { grid-area: 1 / 2 / 2 / 3; display: flex; flex-direction: column; }
+.order-execution-panel { grid-area: 2 / 1 / 3 / 2; }
+.positions-panel { grid-area: 3 / 1 / 4 / 2; display: flex; flex-direction: column; overflow-y: auto; }
+.portfolio-panel { grid-area: 2 / 2 / 3 / 3; }
+.bot-panel { grid-area: 3 / 2 / 4 / 3; }
+
+/* Chart Panel */
+#tradingChart {
+    width: 100%;
+    height: 400px;
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(0, 255, 204, 0.2);
+    border-radius: 5px;
+    margin-bottom: 15px;
+}
+
+.chart-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.chart-controls label {
+    color: #00ccff;
+}
+
+.chart-controls select, .chart-controls button {
+    background-color: #1a0033;
+    border: 1px solid #00ffcc;
+    color: #00ffcc;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Share Tech Mono', monospace;
+}
+
+.chart-controls button:hover, .chart-controls select:hover {
+    background-color: #00ffcc;
+    color: #1a0033;
+    box-shadow: 0 0 10px #00ffcc;
+}
+
+.chart-controls button.active {
+    background-color: #00ffcc;
+    color: #1a0033;
+    box-shadow: 0 0 15px #00ffcc;
+}
+
+/* Order Book Panel */
+.order-book-display {
+    display: flex;
+    flex-direction: column;
+    height: calc(100% - 60px);
+    overflow: hidden;
+}
+
+.asks-container, .bids-container {
+    flex: 1;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.asks-container h3, .bids-container h3 {
+    margin: 0 0 10px 0;
+    color: #00ccff;
+    text-shadow: 0 0 5px #00ccff;
+}
+
+.order-list {
+    flex-grow: 1;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #00ffcc #1a0033;
+    border: 1px solid rgba(0, 255, 204, 0.1);
+    border-radius: 5px;
+    padding: 5px;
+}
+
+.order-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.order-list::-webkit-scrollbar-track {
+    background: #1a0033;
+    border-radius: 10px;
+}
+
+.order-list::-webkit-scrollbar-thumb {
+    background-color: #00ffcc;
+    border-radius: 10px;
+    border: 2px solid #1a0033;
+}
+
+.order-book-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 8px;
+    font-size: 0.9em;
+    position: relative;
+    overflow: hidden;
+    border-radius: 3px;
+    margin-bottom: 2px;
+}
+
+.order-book-item::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    background-color: rgba(0, 255, 204, 0.05);
+    z-index: 0;
+    width: var(--depth-width, 0%);
+    transition: width 0.1s ease-out;
+}
+
+.order-book-item span {
+    position: relative;
+    z-index: 1;
+}
+
+.order-book-item.bid {
+    color: #00ff99;
+}
+
+.order-book-item.bid::before {
+    background-color: rgba(0, 255, 153, 0.1);
+}
+
+.order-book-item.ask {
+    color: #ff3366;
+}
+
+.order-book-item.ask::before {
+    background-color: rgba(255, 51, 102, 0.1);
+}
+
+/* Order Execution Panel */
+.order-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.order-type button {
+    background-color: #1a0033;
+    border: 1px solid #00ffcc;
+    color: #00ffcc;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Share Tech Mono', monospace;
+    margin-right: 10px;
+}
+
+.order-type button.active {
+    background-color: #00ffcc;
+    color: #1a0033;
+    box-shadow: 0 0 15px #00ffcc;
+}
+
+.order-type button:hover:not(.active) {
+    background-color: rgba(0, 255, 204, 0.2);
+}
+
+.input-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.input-group label {
+    color: #00ccff;
+    min-width: 80px;
+}
+
+.input-group input[type="number"],
+.input-group input[type="range"] {
+    flex-grow: 1;
+    background-color: #1a0033;
+    border: 1px solid #00ffcc;
+    color: #00ffcc;
+    padding: 8px 10px;
+    border-radius: 5px;
+    font-family: 'Share Tech Mono', monospace;
+    outline: none;
+}
+
+.input-group input[type="number"]:focus {
+    box-shadow: 0 0 10px #00ffcc;
+}
+
+.input-group input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 15px;
+    height: 15px;
+    background: #00ffcc;
+    cursor: pointer;
+    border-radius: 50%;
+    box-shadow: 0 0 5px #00ffcc;
+}
+
+.input-group input[type="range"]::-moz-range-thumb {
+    width: 15px;
+    height: 15px;
+    background: #00ffcc;
+    cursor: pointer;
+    border-radius: 50%;
+    box-shadow: 0 0 5px #00ffcc;
+}
+
+.order-buttons {
+    display: flex;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.order-buttons button {
+    flex: 1;
+    padding: 15px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.2em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Share Tech Mono', monospace;
+    text-shadow: 0 0 5px rgba(0,0,0,0.5);
+}
+
+.order-buttons .buy {
+    background-color: #00cc66;
+    color: #0a0a0a;
+    box-shadow: 0 0 15px rgba(0, 204, 102, 0.7);
+}
+
+.order-buttons .buy:hover {
+    background-color: #00ff99;
+    box-shadow: 0 0 25px rgba(0, 255, 153, 0.9);
+}
+
+.order-buttons .sell {
+    background-color: #cc3366;
+    color: #0a0a0a;
+    box-shadow: 0 0 15px rgba(204, 51, 102, 0.7);
+}
+
+.order-buttons .sell:hover {
+    background-color: #ff6699;
+    box-shadow: 0 0 25px rgba(255, 102, 153, 0.9);
+}
+
+/* Positions and Portfolio Panels */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    font-size: 0.9em;
+}
+
+table th, table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid rgba(0, 255, 204, 0.1);
+}
+
+table th {
+    color: #00ccff;
+    background-color: rgba(0, 255, 204, 0.05);
+    text-transform: uppercase;
+}
+
+table tbody tr:hover {
+    background-color: rgba(0, 255, 204, 0.08);
+}
+
+table td.positive { color: #00ff99; }
+table td.negative { color: #ff3366; }
+
+.close-position-btn {
+    background-color: #cc3366;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.close-position-btn:hover {
+    background-color: #ff6699;
+}
+
+.portfolio-panel p {
+    margin-bottom: 10px;
+    font-size: 1.1em;
+}
+
+.portfolio-panel p span {
+    font-weight: bold;
+    color: #00ffcc;
+    text-shadow: 0 0 5px #00ffcc;
+}
+
+/* Bot Panel */
+.bot-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.bot-controls label {
+    color: #00ccff;
+}
+
+.bot-controls select, .bot-controls input[type="number"] {
+    background-color: #1a0033;
+    border: 1px solid #00ffcc;
+    color: #00ffcc;
+    padding: 8px 10px;
+    border-radius: 5px;
+    font-family: 'Share Tech Mono', monospace;
+    outline: none;
+    width: calc(100% - 22px);
+}
+
+.bot-controls button {
+    background-color: #6633cc;
+    border: 1px solid #9966ff;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1.1em;
+}
+
+.bot-controls button:hover {
+    background-color: #9966ff;
+    box-shadow: 0 0 15px #9966ff;
+}
+
+#botStatus {
+    margin-top: 10px;
+    font-weight: bold;
+    color: #00ffcc;
+}
+
+#botStatus.active { color: #00ff99; }
+#botStatus.inactive { color: #ff3366; }
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .main-grid {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto auto auto auto;
+    }
+
+    .chart-panel { grid-area: auto; }
+    .order-book-panel { grid-area: auto; }
+    .order-execution-panel { grid-area: auto; }
+    .positions-panel { grid-area: auto; }
+    .portfolio-panel { grid-area: auto; }
+    .bot-panel { grid-area: auto; }
+
+    .order-book-display {
+        flex-direction: row;
+        height: auto;
+    }
+
+    .asks-container, .bids-container {
+        flex: 1;
+        margin-right: 10px;
+        margin-bottom: 0;
+    }
+
+    .asks-container:last-child, .bids-container:last-child {
+        margin-right: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 5px;
+    }
+
+    .ticker-banner {
+        font-size: 0.9em;
+        height: 25px;
+    }
+
+    .panel {
+        padding: 15px;
+    }
+
+    h2 {
+        font-size: 1.3em;
+        margin-bottom: 15px;
+    }
+
+    .chart-controls {
+        flex-direction: column;
+    }
+
+    .order-type button {
+        padding: 8px 15px;
+    }
+
+    .order-buttons button {
+        padding: 12px;
+        font-size: 1em;
+    }
+
+    table th, table td {
+        padding: 8px;
+        font-size: 0.8em;
+    }
+
+    .portfolio-panel p {
+        font-size: 1em;
+    }
+}
+
+/* Toast Notifications */
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+}
+
+.toast {
+    background: rgba(15, 5, 30, 0.95);
+    border: 1px solid #00ffcc;
+    color: #00ffcc;
+    padding: 12px 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(0, 255, 204, 0.4);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.95em;
+    min-width: 260px;
+    backdrop-filter: blur(8px);
+    pointer-events: auto;
+    animation: toast-in 0.3s ease-out forwards;
+}
+
+.toast.success {
+    border-color: #00ff99;
+    color: #00ff99;
+    box-shadow: 0 0 15px rgba(0, 255, 153, 0.4);
+}
+
+.toast.error {
+    border-color: #ff3366;
+    color: #ff3366;
+    box-shadow: 0 0 15px rgba(255, 51, 102, 0.4);
+}
+
+.toast.info {
+    border-color: #00ccff;
+    color: #00ccff;
+    box-shadow: 0 0 15px rgba(0, 204, 255, 0.4);
+}
+
+.toast.warning {
+    border-color: #ffcc00;
+    color: #ffcc00;
+    box-shadow: 0 0 15px rgba(255, 204, 0, 0.4);
+}
+
+@keyframes toast-in {
+    from {
+        opacity: 0;
+        transform: translateX(50px) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+@keyframes toast-out {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(50px);
+    }
+}

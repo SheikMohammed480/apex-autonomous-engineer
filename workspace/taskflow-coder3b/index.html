@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TaskFlow</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <input type="text" id="search-bar" placeholder="Search tasks...">
+  <div class="priority-filters">
+    <button class="filter-btn" data-priority="high">High</button>
+    <button class="filter-btn" data-priority="medium">Medium</button>
+    <button class="filter-btn" data-priority="low">Low</button>
+  </div>
+  <button id="new-task-btn">New Task</button>
+</header>
+<div class="stats-bar">
+  <span>Tasks: 0</span>
+  <span>In Progress: 0</span>
+  <span>Review: 0</span>
+  <span>Done: 0</span>
+</div>
+<div class="kanban-board">
+  <div class="column" id="backlog">Backlog</div>
+  <div class="column" id="in-progress">In Progress</div>
+  <div class="column" id="review">Review</div>
+  <div class="column" id="done">Done</div>
+</div>
+<script src="app.js"></script>
+</body>
+</html>

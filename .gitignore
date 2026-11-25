@@ -1,0 +1,28 @@
+# Python Virtual Environments & Cache
+venv/
+.venv/
+env/
+backend/venv/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Node / Frontend
+node_modules/
+frontend/node_modules/
+dist/
+frontend/dist/
+.vite/
+frontend/.vite/
+
+# Secret Environment Files & Databases
+.env
+backend/.env
+*.db
+backend/*.db
+!backend/agentic_history.db.example
+
+# Logs & OS artifacts
+*.log
+.DS_Store
+Thumbs.db

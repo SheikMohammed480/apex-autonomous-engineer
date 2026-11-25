@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TaskFlow – Kanban Board</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <!-- Header -->
+    <header class="app-header">
+        <h1 class="app-title">TaskFlow</h1>
+        <div class="header-controls">
+            <input type="text" id="search-input" placeholder="Search tasks..." />
+            <div class="priority-filters">
+                <button class="filter-btn" data-priority="High">High</button>
+                <button class="filter-btn" data-priority="Medium">Medium</button>
+                <button class="filter-btn" data-priority="Low">Low</button>
+            </div>
+            <button id="new-task-btn" class="new-task-btn">+ New Task</button>
+        </div>
+    </header>
+
+    <!-- Stats Bar -->
+    <section id="stats-bar" class="stats-bar">
+        <span>Total: <span id="total-count">0</span></span>
+        <span>Backlog: <span id="backlog-count">0</span></span>
+        <span>In Progress: <span id="inprogress-count">0</span></span>
+        <span>Review: <span id="review-count">0</span></span>
+        <span>Done: <span id="done-count">0</span></span>
+    </section>
+
+    <!-- Kanban Board -->
+    <main class="board">
+        <section class="column" data-status="Backlog">
+            <h2>Backlog</h2>
+            <div class="card-container" id="backlog-column"></div>
+        </section>
+        <section class="column" data-status="In Progress">
+            <h2>In Progress</h2>
+            <div class="card-container" id="inprogress-column"></div>
+        </section>
+        <section class="column" data-status="Review">
+            <h2>Review</h2>
+            <div class="card-container" id="review-column"></div>
+        </section>
+        <section class="column" data-status="Done">
+            <h2>Done</h2>
+            <div class="card-container" id="done-column"></div>
+        </section>
+    </main>
+
+    <!-- Modal Dialog -->
+    <div id="task-modal" class="modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <h2 id="modal-title">New Task</h2>
+            <form id="task-form">
+                <label>
+                    Title
+                    <input type="text" name="title" id="task-title" required />
+                </label>
+                <label>
+                    Description
+                    <textarea name="description" id="task-desc" rows="4"></textarea>
+                </label>
+                <label>
+                    Priority
+                    <select name="priority" id="task-priority" required>
+                        <option value="High">High</option>
+                        <option value="Medium" selected>Medium</option>
+                        <option value="Low">Low</option>
+                    </select>
+                </label>
+                <label>
+                    Due Date
+                    <input type="date" name="dueDate" id="task-due" />
+                </label>
+                <div class="modal-actions">
+                    <button type="submit" class="save-btn">Save</button>
+                    <button type="button" class="cancel-btn" id="cancel-btn">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

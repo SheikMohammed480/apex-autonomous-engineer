@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskFlow Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <input type="search" id="searchBar" placeholder="Search..." />
+            <select id="priorityFilter">
+                <option value="All">All</option>
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+            </select>
+            <button>New Task</button>
+        </nav>
+    </header>
+    <div class="stats-bar">
+        <p>Total Tasks: 0</p>
+        <p>In Progress: 0</p>
+        <p>Completed: 0</p>
+    </div>
+    <div id="kanban-board"></div>
+    <script src="app.js"></script>
+</body>
+</html>

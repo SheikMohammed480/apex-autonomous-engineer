@@ -1,0 +1,81 @@
+/* Dark Mode Stylesheet */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #121212;
+  color: #ffffff;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background-color: #333333;
+}
+
+input[type="text"] {
+  padding: 8px;
+  border: none;
+  border-radius: 4px;
+  outline: none;
+  color: #ffffff;
+  background-color: #555555;
+}
+
+.priority-filters button {
+  margin-right: 10px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: #333333;
+  color: #ffffff;
+}
+
+.priority-filters button:hover {
+  background-color: #555555;
+}
+
+.stats-bar span {
+  margin-right: 20px;
+}
+
+.kanban-board {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+}
+
+.column {
+  width: 30%;
+  border: 1px solid #444444;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+}
+
+.card {
+  background-color: #333333;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  padding: 15px;
+  color: #ffffff;
+}
+
+.priority-badge {
+  display: inline-block;
+  padding: 5px 10px;
+  background-color: #ff6347;
+  border-radius: 5px;
+  margin-right: 10px;
+}
+
+@media (max-width: 768px) {
+  .column {
+    width: 50%;
+  }
+}
+@media (max-width: 480px) {
+  .column {
+    width: 100%;
+  }
+}

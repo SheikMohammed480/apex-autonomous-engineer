@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyberpunk Trading Platform</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="ticker-banner" id="ticker-banner">
+            <!-- Live price ticker will go here -->
+        </div>
+
+        <div class="main-grid">
+            <div class="chart-panel panel">
+                <canvas id="tradingChart"></canvas>
+                <div class="chart-controls">
+                    <label for="timeframe">Timeframe:</label>
+                    <select id="timeframe">
+                        <option value="1m">1m</option>
+                        <option value="5m">5m</option>
+                        <option value="15m">15m</option>
+                        <option value="1h">1h</option>
+                        <option value="4h">4h</option>
+                        <option value="1d">1d</option>
+                    </select>
+                    <button id="toggleRSI">RSI</button>
+                    <button id="toggleMACD">MACD</button>
+                    <button id="toggleBB">Bollinger Bands</button>
+                    <button id="toggleSMA">SMA</button>
+                    <button id="toggleEMA">EMA</button>
+                </div>
+            </div>
+
+            <div class="order-book-panel panel">
+                <h2>Order Book</h2>
+                <div class="order-book-display">
+                    <div class="asks-container">
+                        <h3>Asks</h3>
+                        <div id="asks-list" class="order-list"></div>
+                    </div>
+                    <div class="bids-container">
+                        <h3>Bids</h3>
+                        <div id="bids-list" class="order-list"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="order-execution-panel panel">
+                <h2>Order Execution</h2>
+                <div class="order-controls">
+                    <div class="order-type">
+                        <button id="marketOrderBtn" class="active">Market</button>
+                        <button id="limitOrderBtn">Limit</button>
+                    </div>
+                    <div class="input-group">
+                        <label for="orderPrice">Price:</label>
+                        <input type="number" id="orderPrice" placeholder="Market" disabled>
+                    </div>
+                    <div class="input-group">
+                        <label for="orderAmount">Amount:</label>
+                        <input type="number" id="orderAmount" value="1" min="0.01" step="0.01">
+                    </div>
+                    <div class="input-group">
+                        <label for="leverageSlider">Leverage: <span id="leverageValue">1x</span></label>
+                        <input type="range" id="leverageSlider" min="1" max="100" value="1">
+                    </div>
+                    <div class="order-buttons">
+                        <button id="buyBtn" class="buy">BUY</button>
+                        <button id="sellBtn" class="sell">SELL</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="positions-panel panel">
+                <h2>Open Positions</h2>
+                <table id="positions-table">
+                    <thead>
+                        <tr>
+                            <th>Symbol</th>
+                            <th>Type</th>
+                            <th>Amount</th>
+                            <th>Entry Price</th>
+                            <th>Current Price</th>
+                            <th>P&L</th>
+                            <th>Liquidation</th>
+                            <th>Close</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Positions will be dynamically inserted here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="portfolio-panel panel">
+                <h2>Portfolio</h2>
+                <p>Balance: <span id="portfolio-balance">$100,000.00</span></p>
+                <p>Equity: <span id="portfolio-equity">$100,000.00</span></p>
+                <p>Margin Used: <span id="portfolio-margin-used">$0.00</span></p>
+                <p>Unrealized P&L: <span id="portfolio-unrealized-pnl">$0.00</span></p>
+                <p>Realized P&L: <span id="portfolio-realized-pnl">$0.00</span></p>
+            </div>
+
+            <div class="bot-panel panel">
+                <h2>Auto-Trading Bot</h2>
+                <div class="bot-controls">
+                    <label for="botStrategy">Strategy:</label>
+                    <select id="botStrategy">
+                        <option value="rsi">RSI Crossover (30 / 70)</option>
+                        <option value="ma_cross">MA Golden / Death Cross</option>
+                        <option value="macd">MACD Signal Crossover</option>
+                    </select>
+                    <div class="input-group">
+                        <label for="botAmount">Trade Amount:</label>
+                        <input type="number" id="botAmount" value="0.1" min="0.01" step="0.01">
+                    </div>
+                    <button id="toggleBotBtn">Start Bot</button>
+                    <p id="botStatus">Status: Inactive</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="market_engine.js"></script>
+    <script src="indicators.js"></script>
+    <script src="chart.js"></script>
+    <script src="portfolio.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
