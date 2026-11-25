@@ -83,6 +83,43 @@ The script automatically:
 
 ---
 
+## 🌐 Deploy & Host Online (Free Cloud Platforms)
+
+You can host Apex Agent online 24/7 with zero server costs using any free cloud platform:
+
+### Option 1: 1-Click Deploy on Render (Recommended — 100% Free)
+Render hosts the unified Docker container (Frontend + FastAPI backend + WebSockets) with automatic HTTPS:
+1. Click the button below or visit [render.com](https://render.com):
+   
+   [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/SheikMohammed480/apex-autonomous-engineer)
+2. Sign in with GitHub and select your repository: `SheikMohammed480/apex-autonomous-engineer`.
+3. Select **Docker** environment.
+4. *(Optional)* Add your `GEMINI_API_KEY` in Environment Variables.
+5. Click **Deploy Web Service** — Render automatically builds and hosts your live app at `https://apex-autonomous-engineer.onrender.com`.
+
+### Option 2: 1-Click Deploy on Railway
+1. Go to [railway.app](https://railway.app/new).
+2. Choose **Deploy from GitHub repo** and select `SheikMohammed480/apex-autonomous-engineer`.
+3. Railway detects the `Dockerfile` automatically and assigns a live public domain.
+
+### Option 3: Instant Public URL via Tunnel (Test Right Now)
+If you want a live public URL immediately to share with anyone without deploying to the cloud:
+```bash
+npx localtunnel --port 8000
+```
+*(Provides an instant `https://xxxx.loca.lt` public link serving your full studio interface).*
+
+### Option 4: Self-Hosted Docker (Any VPS, AWS, GCP, DigitalOcean)
+```bash
+# Build the unified production container
+docker build -t apex-agent .
+
+# Run container on port 8000
+docker run -d -p 8000:8000 -e GEMINI_API_KEY="your-gemini-key" apex-agent
+```
+
+---
+
 ## 🛠️ Step-by-Step Manual Setup
 
 If you prefer to run services manually in separate terminals:

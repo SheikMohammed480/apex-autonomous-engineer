@@ -335,3 +335,11 @@ async def websocket_agent_endpoint(websocket: WebSocket):
             await websocket.send_json({"error": str(e)})
         except Exception:
             pass
+
+
+# ==================== Unified Static Frontend Serving ====================
+from fastapi.staticfiles import StaticFiles
+
+frontend_dist = Path(__file__).resolve().parent.parent.parent / "frontend" / "dist"
+if frontend_dist.exists() and (frontend_dist / "index.html").exists():
+    app.mount("/", StaticFiles(directory=str(frontend_dist), html=True), name="frontend_static")
