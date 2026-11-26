@@ -119,6 +119,7 @@ class GroqClient:
                         raise RuntimeError("Groq returned empty response choices.")
 
                     first_msg = choices[0].get("message", {})
+                    usage = data.get("usage", {})
                     
                     # Normalize tool_calls arguments if needed (ensure string format conforms)
                     tool_calls = first_msg.get("tool_calls") or []
@@ -128,7 +129,9 @@ class GroqClient:
                             "role": "assistant",
                             "content": first_msg.get("content") or "",
                             "tool_calls": tool_calls
-                        }
+                        },
+                        "usage": usage,
+                        "model_used": clean_model
                     }
                 except httpx.TimeoutException:
                     if attempt < max_retries - 1:

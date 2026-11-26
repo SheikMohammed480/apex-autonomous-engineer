@@ -130,11 +130,24 @@ export const HardwareBanner: React.FC<Props> = ({
               {profile.available_ollama_models.map((m) => {
                 const isGemini = m.includes('gemini');
                 const isGroq = m.includes('openai') || m.includes('qwen3.8') || m.includes('llama') || m.includes('deepseek') || m.includes('groq');
-                const label = isGemini
-                  ? `✨ ${m} (Google Gemini - 1M Free TPM)`
-                  : isGroq
-                  ? `⚡ ${m} (Groq Cloud - Free)`
-                  : `🖥️ ${m} (Local)`;
+                
+                let label = `🖥️ ${m} [Local • Unlimited Tokens]`;
+                if (isGemini) {
+                  if (m.includes('3.5-flash-lite')) {
+                    label = `🚀 ${m} [1,000,000 TPM • Ultra-Fast]`;
+                  } else if (m.includes('3.5-flash')) {
+                    label = `✨ ${m} [1,000,000 TPM Free • High Limit]`;
+                  } else {
+                    label = `✨ ${m} [1,000,000 TPM Free]`;
+                  }
+                } else if (isGroq) {
+                  if (m.includes('120b')) {
+                    label = `⚡ ${m} [Groq 6K TPM • 120B Frontier]`;
+                  } else {
+                    label = `⚡ ${m} [Groq 8K TPM • 500+ tok/s]`;
+                  }
+                }
+
                 return (
                   <option key={m} value={m}>
                     {label} {m === profile.recommended_model ? '★ Best' : ''}
@@ -142,6 +155,18 @@ export const HardwareBanner: React.FC<Props> = ({
                 );
               })}
             </select>
+            {/* Active Model Token Quota Pill */}
+            <span
+              className="text-[10px] bg-purple-950/80 text-purple-300 border border-purple-700/60 px-2 py-0.5 rounded-full font-mono shrink-0"
+              title="Token quota capacity per minute"
+            >
+              Quota:{' '}
+              {selectedModel.includes('gemini')
+                ? '1M TPM'
+                : selectedModel.includes('openai') || selectedModel.includes('qwen3.8') || selectedModel.includes('groq')
+                ? '8K TPM'
+                : 'Unlimited'}
+            </span>
           </div>
         </div>
       </div>

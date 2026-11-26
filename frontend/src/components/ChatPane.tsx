@@ -5,14 +5,29 @@ import { Send, Terminal, Code, CheckCircle, AlertCircle, Loader2, Sparkles, Cloc
 interface Props {
   steps: AgentStepUpdate[];
   isRunning: boolean;
+  selectedModel?: string;
+  onSelectModel?: (model: string) => void;
+  availableModels?: string[];
   onSendMessage: (msg: string) => void;
   onSelectResult: (step: AgentStepUpdate) => void;
 }
 
-export const ChatPane: React.FC<Props> = ({ steps, isRunning, onSendMessage, onSelectResult }) => {
+export const ChatPane: React.FC<Props> = ({
+  steps,
+  isRunning,
+  selectedModel = 'gemini-3.5-flash',
+  onSelectModel,
+  availableModels = [],
+  onSendMessage,
+  onSelectResult
+}) => {
   const [input, setInput] = useState('');
   const [elapsed, setElapsed] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Extract latest token count reported by engine
+  const latestUsageStep = [...steps].reverse().find((s) => s.tool_args && s.tool_args.tokens_used);
+  const tokensUsed = latestUsageStep?.tool_args?.tokens_used;
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -82,6 +97,11 @@ export const ChatPane: React.FC<Props> = ({ steps, isRunning, onSendMessage, onS
         <div className="flex items-center gap-2 font-medium text-sm text-white">
           <Terminal className="w-4 h-4 text-purple-400" />
           <span>Apex Execution Stream</span>
+          {tokensUsed && tokensUsed > 0 && (
+            <span className="text-[10px] bg-purple-950/80 border border-purple-700/60 text-purple-300 px-2 py-0.5 rounded-full font-mono">
+              🪙 {tokensUsed.toLocaleString()} tokens
+            </span>
+          )}
         </div>
         {isRunning && (
           <div className="flex items-center gap-2 text-xs text-purple-300 bg-purple-950/60 border border-purple-700/60 px-2.5 py-1 rounded-full font-mono shadow-sm animate-pulse">
@@ -91,6 +111,41 @@ export const ChatPane: React.FC<Props> = ({ steps, isRunning, onSendMessage, onS
           </div>
         )}
       </div>
+
+      {/* Quick Model Switcher Pills */}
+      {onSelectModel && (
+        <div className="px-3 py-1.5 bg-[#0d1117] border-b border-[#30363d] flex items-center gap-1.5 overflow-x-auto text-[11px] scrollbar-none">
+          <span className="text-gray-500 shrink-0 font-medium text-[10px] uppercase tracking-wider">Model:</span>
+          {[
+            { id: 'gemini-3.5-flash', label: 'Gemini 3.5', badge: '1M TPM', icon: '✨' },
+            { id: 'gemini-3.5-flash-lite', label: 'Flash-Lite', badge: 'Fast 1M', icon: '🚀' },
+            { id: 'gemini-2.5-flash', label: 'Gemini 2.5', badge: '1M TPM', icon: '⭐' },
+            { id: 'qwen/qwen3.8-27b', label: 'Groq 27B', badge: '8K TPM', icon: '⚡' },
+            { id: 'qwen2.5-coder:7b', label: 'Local', badge: 'Unlimited', icon: '🖥️' }
+          ].map((m) => {
+            const isActive = selectedModel === m.id;
+            return (
+              <button
+                key={m.id}
+                type="button"
+                onClick={() => onSelectModel(m.id)}
+                className={`flex items-center gap-1 px-2 py-0.5 rounded-full shrink-0 font-mono text-[10px] transition border ${
+                  isActive
+                    ? 'bg-purple-900/80 border-purple-500 text-white shadow-sm font-semibold'
+                    : 'bg-[#161b22] border-[#30363d] text-gray-400 hover:text-white hover:border-gray-500'
+                }`}
+                title={`Switch model to ${m.id} (${m.badge})`}
+              >
+                <span>{m.icon}</span>
+                <span>{m.label}</span>
+                <span className={`text-[9px] px-1 rounded ${isActive ? 'bg-purple-950 text-purple-200' : 'bg-[#0d1117] text-gray-500'}`}>
+                  {m.badge}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {/* Message & Step List */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
@@ -186,14 +241,88 @@ export const ChatPane: React.FC<Props> = ({ steps, isRunning, onSendMessage, onS
               );
             }
 
+            if (isError) {
+              const suggestedModels = step.tool_args?.suggested_models || [];
+              const rawDetail = step.tool_args?.raw_detail;
+              return (
+                <div
+                  key={idx}
+                  onClick={() => onSelectResult(step)}
+                  className="p-3.5 rounded-xl text-xs cursor-pointer transition border border-amber-500/50 bg-gradient-to-br from-amber-950/40 via-[#1b1512] to-[#120d17] text-amber-100 shadow-md shadow-amber-950/30"
+                >
+                  <div className="flex items-center justify-between mb-2 pb-2 border-b border-amber-800/40">
+                    <div className="flex items-center gap-2">
+                      <div className="w-5 h-5 rounded-full bg-amber-500/20 border border-amber-500/60 flex items-center justify-center text-amber-400">
+                        <AlertCircle className="w-3.5 h-3.5" />
+                      </div>
+                      <span className="font-semibold text-amber-200 text-xs">{step.title || 'Model Quota Notice'}</span>
+                    </div>
+                    <span className="text-[10px] bg-amber-950/80 text-amber-400 border border-amber-700/60 px-2 py-0.5 rounded-full font-mono">
+                      Token Limit / Action
+                    </span>
+                  </div>
+
+                  {/* Human-Friendly Message */}
+                  <div className="text-gray-200 font-sans text-xs whitespace-pre-wrap leading-relaxed select-text space-y-2">
+                    {step.content}
+                  </div>
+
+                  {/* 1-Click Interactive Model Switcher */}
+                  {suggestedModels.length > 0 && onSelectModel && (
+                    <div className="mt-3 pt-2.5 border-t border-amber-800/40">
+                      <div className="text-[11px] font-semibold text-amber-300 mb-2 flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                        <span>Switch Model with 1-Click to Continue:</span>
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {suggestedModels.map((m: any, mIdx: number) => {
+                          const isCurrent = selectedModel === m.name;
+                          return (
+                            <button
+                              key={mIdx}
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onSelectModel(m.name);
+                              }}
+                              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition shadow-sm border ${
+                                isCurrent
+                                  ? 'bg-purple-600 text-white border-purple-400 shadow-purple-600/30'
+                                  : 'bg-[#161b22] hover:bg-[#21262d] text-gray-200 hover:text-white border-[#30363d] hover:border-purple-500/60'
+                              }`}
+                            >
+                              <span>{m.label}</span>
+                              {m.badge && (
+                                <span className="text-[9px] bg-purple-950/90 text-purple-300 border border-purple-800/60 px-1 py-0.2 rounded font-mono">
+                                  {m.badge}
+                                </span>
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Expandable Technical Details */}
+                  {rawDetail && (
+                    <details className="mt-2.5 text-[10px] text-gray-500" onClick={(e) => e.stopPropagation()}>
+                      <summary className="cursor-pointer hover:text-gray-400 font-mono">View raw technical details</summary>
+                      <pre className="mt-1 p-2 bg-[#0d1117] rounded border border-[#30363d] overflow-x-auto text-[10px] font-mono text-rose-300/80 whitespace-pre-wrap">
+                        {rawDetail}
+                      </pre>
+                    </details>
+                  )}
+                </div>
+              );
+            }
+
             return (
               <div
                 key={idx}
                 onClick={() => onSelectResult(step)}
                 className={`p-3 rounded-lg text-xs cursor-pointer transition border ${
-                  isError
-                    ? 'bg-rose-950/30 border-rose-800/50 text-rose-200 shadow-sm'
-                    : isComplete
+                  isComplete
                     ? 'bg-emerald-950/30 border-emerald-800/50 text-emerald-200 shadow-sm'
                     : isTool
                     ? 'bg-[#0d1117] border-[#30363d] hover:border-purple-500/60 text-gray-300'
@@ -204,8 +333,6 @@ export const ChatPane: React.FC<Props> = ({ steps, isRunning, onSendMessage, onS
                   <span className="font-semibold flex items-center gap-1.5">
                     {isComplete ? (
                       <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
-                    ) : isError ? (
-                      <AlertCircle className="w-3.5 h-3.5 text-rose-400" />
                     ) : isTool ? (
                       <Code className="w-3.5 h-3.5 text-blue-400" />
                     ) : (

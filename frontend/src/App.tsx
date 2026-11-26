@@ -271,6 +271,9 @@ export const App: React.FC = () => {
           <ChatPane
             steps={steps}
             isRunning={isRunning}
+            selectedModel={selectedModel}
+            onSelectModel={setSelectedModel}
+            availableModels={profile?.available_ollama_models || []}
             onSendMessage={handleSendMessage}
             onSelectResult={(step) => {
               setActiveStep(step);

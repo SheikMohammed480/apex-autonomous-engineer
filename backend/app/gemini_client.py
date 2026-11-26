@@ -30,6 +30,7 @@ GEMINI_MODELS = [
 FALLBACK_CHAIN = {
     "gemini-2.5-flash": "gemini-3.5-flash",
     "gemini-3.5-flash": "gemini-3.5-flash-lite",
+    "gemini-3.5-flash-lite": "gemini-2.5-flash",
 }
 
 
@@ -86,16 +87,27 @@ class GeminiClient:
                     res = await client.post(GEMINI_API_URL, headers=headers, json=payload)
                     if res.status_code in (429, 503):
                         err_text = res.text
-                        # Check if daily request quota for this specific model was exceeded
-                        if "Generate content requests per day limit exceeded" in err_text or "limit: 20" in err_text:
+                        # Check if daily request quota or rate limit for this specific model was exceeded
+                        is_quota_exhausted = any(
+                            phrase in err_text
+                            for phrase in [
+                                "RESOURCE_EXHAUSTED",
+                                "Resource has been exhausted",
+                                "requests per day limit exceeded",
+                                "limit: 20",
+                                "Quota exceeded",
+                                "rateLimitExceeded"
+                            ]
+                        )
+                        if is_quota_exhausted:
                             fallback = FALLBACK_CHAIN.get(clean_model)
                             if fallback and fallback != clean_model:
-                                logger.warning(f"Daily quota hit for {clean_model}, auto-failing over to {fallback}")
+                                logger.warning(f"Quota reached for {clean_model}, auto-failing over to {fallback}")
                                 clean_model = fallback
                                 payload["model"] = fallback
                                 continue
                         if attempt < max_retries - 1:
-                            wait_sec = 6.0 if res.status_code == 503 else 4.0
+                            wait_sec = 6.0 if res.status_code == 503 else 3.0
                             await asyncio.sleep(wait_sec)
                             continue
 
@@ -110,13 +122,16 @@ class GeminiClient:
                         raise RuntimeError(f"Gemini returned no choices: {data}")
 
                     msg = choices[0].get("message", {})
+                    usage = data.get("usage", {})
                     # Ensure format matches standard agent schema
                     return {
                         "message": {
                             "role": msg.get("role", "assistant"),
                             "content": msg.get("content") or "",
                             "tool_calls": msg.get("tool_calls", [])
-                        }
+                        },
+                        "usage": usage,
+                        "model_used": clean_model
                     }
                 except httpx.RequestError as exc:
                     if attempt < max_retries - 1:

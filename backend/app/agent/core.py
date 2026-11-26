@@ -10,6 +10,7 @@ from app.agent.context import generate_repo_map, compact_messages
 from app.tools.registry import TOOL_DEFINITIONS, dispatch_tool_call
 from app.schemas import AgentStepUpdate
 from app.db import save_step
+from app.agent.errors import humanize_agent_error
 
 logger = logging.getLogger("agent.core")
 
@@ -160,6 +161,7 @@ class AgentEngine:
         turn = 0
         last_tool_signature = None
         consecutive_repeats = 0
+        total_tokens_used = 0
 
         while turn < max_turns:
             turn += 1
@@ -188,15 +190,40 @@ class AgentEngine:
                         tools=TOOL_DEFINITIONS
                     )
             except Exception as e:
-                err_msg = f"Model Inference Error ({active_model}): {str(e)}"
+                err_info = humanize_agent_error(e, active_model)
+                friendly_title = err_info["title"]
+                friendly_content = err_info["friendly_message"]
                 if session_id:
-                    save_step(session_id=session_id, step_type="error", title="Model Inference Error", content=err_msg)
+                    save_step(
+                        session_id=session_id,
+                        step_type="error",
+                        title=friendly_title,
+                        content=friendly_content,
+                        tool_args=err_info
+                    )
                 yield AgentStepUpdate(
                     step_type="error",
-                    title="Model Inference Error",
-                    content=err_msg
+                    title=friendly_title,
+                    content=friendly_content,
+                    tool_args=err_info
                 )
                 return
+
+            # Check if client auto-switched model due to quota limits
+            used_model = response.get("model_used")
+            if used_model and used_model != active_model:
+                yield AgentStepUpdate(
+                    step_type="thought",
+                    title="Model Auto-Failover",
+                    content=f"⚠️ Switched to sibling model **{used_model}** with fresh 1M TPM quota."
+                )
+                active_model = used_model
+
+            # Accumulate token usage
+            usage = response.get("usage") or {}
+            p_tok = usage.get("prompt_tokens") or usage.get("promptTokenCount") or 0
+            c_tok = usage.get("completion_tokens") or usage.get("candidatesTokenCount") or 0
+            total_tokens_used += (p_tok + c_tok)
 
             assistant_msg = response.get("message", {})
             messages.append(assistant_msg)
@@ -219,7 +246,8 @@ class AgentEngine:
                 yield AgentStepUpdate(
                     step_type=step_type,
                     title=step_title,
-                    content=content
+                    content=content,
+                    tool_args={"tokens_used": total_tokens_used, "model": active_model}
                 )
 
             # If no tools called, the agent has concluded its work
@@ -230,7 +258,8 @@ class AgentEngine:
                 yield AgentStepUpdate(
                     step_type="complete",
                     title="Task Completed",
-                    content=complete_msg
+                    content=complete_msg,
+                    tool_args={"tokens_used": total_tokens_used, "model": active_model}
                 )
                 return
 
